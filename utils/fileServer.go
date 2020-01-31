@@ -110,22 +110,25 @@ type File interface {
 }
 
 type URLData struct {
-	Name  string
-	Url   string
-	Info  string
-	IsDir bool
+	Name      string
+	Url       string
+	Info      string
+	IsDir     bool
+	Extension string
 }
 
 type Breadcrumb struct {
 	Breadcrumb []URLData
 	Last       int
+	Path       string
 }
 
 func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
-
+	breadcrumb := Breadcrumb{}
+	breadcrumb.Path = path
 	path = strings.TrimLeft(path, "/")
 	pathSplits := strings.Split(path, "/")
-	breadcrumb := Breadcrumb{}
+
 	urlStr := "/"
 	for _, val := range pathSplits {
 		urlStr += val + "/"
@@ -140,7 +143,17 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 		http.Error(w, "Error reading directory", http.StatusInternalServerError)
 		return
 	}
-	sort.Slice(dirs, func(i, j int) bool { return dirs[i].Name() < dirs[j].Name() })
+
+	// 名称排序?
+	sort.Slice(dirs, func(i, j int) bool {
+		// 都是,或者都不是目录
+		if dirs[i].IsDir() == dirs[j].IsDir() {
+			// 那么按照字母顺序排序
+			return strings.ToLower(dirs[i].Name()) < strings.ToLower(dirs[j].Name())
+		}
+		// 有一个不是,那么目录排前面
+		return dirs[i].IsDir() == true
+	})
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -152,9 +165,9 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 		if strings.HasPrefix(name, ".") {
 			continue
 		}
-		if d.IsDir() {
-			name += "/"
-		}
+		// if d.IsDir() {
+		// 	name += "/"
+		// }
 
 		// Info := strconv.FormatInt(d.Size(), 10)
 		Info := "" //暂时没想好些什么
@@ -162,8 +175,9 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 		// part of the URL path, and not indicate the start of a query
 		// string or fragment.
 		url := url.URL{Path: name}
+		extension := filepath.Ext(name)
 		// fmt.Fprintf(w, "<a href=\"%s\">%s</a>\n", url.String(), htmlReplacer.Replace(name))
-		urls = append(urls, URLData{Name: htmlReplacer.Replace(name), Url: url.String(), Info: Info, IsDir: d.IsDir()})
+		urls = append(urls, URLData{Name: htmlReplacer.Replace(name), Url: url.String(), Info: Info, IsDir: d.IsDir(), Extension: extension})
 	}
 	// fmt.Println(urls)
 

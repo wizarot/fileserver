@@ -6,9 +6,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <!-- plyr CSS -->
+    <link rel="stylesheet" href="/static/plyr.css" />
     <title>{{.Title}}</title>
     <style>
+      /* 播放器按钮 */
+      /* .plyr__controls{
+        width:100px;
+      } */
     </style>
   </head>
   <body>
@@ -19,28 +25,39 @@
 
         <nav aria-label="breadcrumb" class=" navbar-expand-md navbar-dark ">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">HOME</a></li>
+            <li class="breadcrumb-item"><a href="/"><strong>HOME</strong></a></li>
             {{$last := .Breadcrumb.Last}}
+            {{$path := .Breadcrumb.Path}}
             {{range $k,$v := .Breadcrumb.Breadcrumb}}
-            <li class="breadcrumb-item" >{{if lt $k $last }} <a href="{{$v.Url}}">{{$v.Name}}</a>{{else}}{{$v.Name}}{{end}}</li>
+            <li class="breadcrumb-item" >{{if lt $k $last }} <a href="{{$v.Url}}"><strong>{{$v.Name}}</strong></a>{{else}}{{$v.Name}}{{end}}</li>
             {{end}}
           </ol>
         </nav>
-        
-        {{range .Urls}}
-        <div class="media text-muted pt-3">
-          <svg class="bd-placeholder-img mr-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 32x32"><title>{{.Name}}</title><rect width="100%" height="100%" fill="#007bff"></rect><text x="50%" y="50%" fill="#007bff" dy=".3em">32</text></svg>
-          <div class="media-body mb-0 small lh-125 border-bottom border-gray">
-            <div class="d-flex justify-content-between align-items-center w-100">
-              <strong class="text-gray-dark">{{.Name}}</strong>
-              <a class="btn btn-sm btn-primary" href="{{.Url}}">点击访问</a>
-            </div>
-            <span class="d-block">{{.Info}}</span>
-          </div>
-        </div>
-        {{end}}
-        
-        
+
+        <table class="table table-hover table-striped table-bordered">
+          <tbody>
+            {{range .Urls}}
+             <tr>
+                 <td style="width: 90%;">
+                   {{if .IsDir}}
+                   <svg aria-label="directory" class="octicon octicon-file-directory" viewBox="0 0 14 16" version="1.1" width="14" height="16" role="img"><path fill-rule="evenodd" d="M13 4H7V3c0-.66-.31-1-1-1H1c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zM6 4H1V3h5v1z"></path></svg>
+                   {{else}}
+                   <svg aria-label="file" class="octicon octicon-file" viewBox="0 0 12 16" version="1.1" width="12" height="16" role="img"><path fill-rule="evenodd" d="M6 5H2V4h4v1zM2 8h7V7H2v1zm0 2h7V9H2v1zm0 2h7v-1H2v1zm10-7.5V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V2c0-.55.45-1 1-1h7.5L12 4.5zM11 5L8 2H1v12h10V5z"></path></svg>
+                   {{end}}
+                   &nbsp;&nbsp;
+                   <a href="{{.Url}}" {{if not .IsDir}}target="_blank"{{end}}>{{.Name}}</a>
+                  </td>
+                  <td style="padding:5px;width: 10%;">
+                    {{if eq .Extension ".mp3"}}
+                    <bottom class="player btn" data-url="{{$path}}/{{.Url}}" data-type="mp3">播放</bottom>
+                    {{end}}
+                  </audio>
+              </td>
+             </tr>
+             {{end}}
+          </tbody>
+      </table>
+
         <small class="d-block text-right mt-3">
           <a href="..">返回上一层目录</a>
         </small>
@@ -49,9 +66,37 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="/static/jquery.slim.min.js" ></script>
+    <script src="/static/popper.min.js" ></script>
+    <script src="/static/bootstrap.min.js" ></script>
+    <!-- poly media player -->
+    <script src="/static/plyr.polyfilled.js"></script>
+    <script src="/static/layer/layer.js"></script>
+
+    <script>
+
+      $(".player").on("click",function () {
+        let type = $(this).data('type')
+        let url = $(this).data('url')
+        console.log(type,url)
+        let content = ""
+        if (type == "mp3") {
+          content = "<div class=\"h-100 row align-items-center\"><div class=\"container\"><audio class=\"js-player \" controls ><source src=\""+url+"\" type=\"audio/mp3\" /></div></div>";
+        }
+        layer.open({
+          type: 1,
+          skin: 'layui-layer-rim', //加上边框
+          area: ['100%', '100%'], //宽高
+          content: content,
+          title: '播放器'
+        });
+
+        const player = new Plyr(".js-player");
+      })
+
+      
+  
+    </script>
   </body>
 </html>
 {{end}}
