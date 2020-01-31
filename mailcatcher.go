@@ -49,8 +49,8 @@ func main() {
 	fs1 := utils.FileServer(utils.Dir("./"))
 	http.Handle("/", http.StripPrefix("/", fs1))
 	// static目录下使用 fileServer
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	// fs := http.FileServer(http.Dir("static"))
+	// http.Handle("/static/", http.StripPrefix("/static/", fs))
 	// 其它路径使用serverTemplate处理
 	// http.HandleFunc("/", serveTemplate)
 
@@ -102,7 +102,6 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "File, %q", path)
 	}
 
-	// http.NotFound(w, r)
 	return
 
 	// fi, _ := dir.Readdir(-1)

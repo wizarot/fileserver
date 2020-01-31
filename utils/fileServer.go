@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -107,7 +109,31 @@ type File interface {
 	Stat() (os.FileInfo, error)
 }
 
-func dirList(w http.ResponseWriter, r *http.Request, f File) {
+type URLData struct {
+	Name  string
+	Url   string
+	Info  string
+	IsDir bool
+}
+
+type Breadcrumb struct {
+	Breadcrumb []URLData
+	Last       int
+}
+
+func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
+
+	path = strings.TrimLeft(path, "/")
+	pathSplits := strings.Split(path, "/")
+	breadcrumb := Breadcrumb{}
+	urlStr := "/"
+	for _, val := range pathSplits {
+		urlStr += val + "/"
+		breadcrumb.Breadcrumb = append(breadcrumb.Breadcrumb, URLData{Name: val, Url: urlStr})
+	}
+	// breadcrumb := Breadcrumb{Breadcrumb: strings.Split(path, "/"), Last: 0}
+	breadcrumb.Last = len(pathSplits) - 1
+
 	dirs, err := f.Readdir(-1)
 	if err != nil {
 		// logf(r, "http: error reading directory: %v", err)
@@ -117,7 +143,8 @@ func dirList(w http.ResponseWriter, r *http.Request, f File) {
 	sort.Slice(dirs, func(i, j int) bool { return dirs[i].Name() < dirs[j].Name() })
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprintf(w, "<pre>\n")
+
+	urls := []URLData{}
 	for _, d := range dirs {
 		name := d.Name()
 		// println(name)
@@ -128,13 +155,43 @@ func dirList(w http.ResponseWriter, r *http.Request, f File) {
 		if d.IsDir() {
 			name += "/"
 		}
+
+		// Info := strconv.FormatInt(d.Size(), 10)
+		Info := "" //暂时没想好些什么
 		// name may contain '?' or '#', which must be escaped to remain
 		// part of the URL path, and not indicate the start of a query
 		// string or fragment.
 		url := url.URL{Path: name}
-		fmt.Fprintf(w, "<a href=\"%s\">%s</a>\n", url.String(), htmlReplacer.Replace(name))
+		// fmt.Fprintf(w, "<a href=\"%s\">%s</a>\n", url.String(), htmlReplacer.Replace(name))
+		urls = append(urls, URLData{Name: htmlReplacer.Replace(name), Url: url.String(), Info: Info, IsDir: d.IsDir()})
 	}
-	fmt.Fprintf(w, "</pre>\n")
+	// fmt.Println(urls)
+
+	// fmt.Fprintf(w, "</pre>\n")
+
+	// layout模板
+	// lp := filepath.Join("views", "layout.html")
+	// 解析r.URL.Path到对应tpl
+	// fp := filepath.Join("views", "dir.html")
+	// tmpl, err := template.ParseFiles(lp, fp)
+	tmpl := template.Must(
+		template.ParseFiles(
+			"views/layout.html",
+		),
+	)
+	if err != nil {
+		// Log the detailed error
+		log.Println(err.Error())
+		// Return a generic "Internal Server Error" message
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "layout", map[string]interface{}{"Urls": urls, "Breadcrumb": breadcrumb, "BreadcrumbLastCurrent": 2, "Title": "GO简易文件服务器"}); err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(500), 500)
+	}
+
 }
 
 // ServeContent replies to the request using the content in the
@@ -624,8 +681,9 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs FileSystem, name strin
 			writeNotModified(w)
 			return
 		}
+		// 临时删掉,要不然每次都缓存太难debug了
 		w.Header().Set("Last-Modified", d.ModTime().UTC().Format(http.TimeFormat))
-		dirList(w, r, f)
+		dirList(w, r, f, name)
 		return
 	}
 

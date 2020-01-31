@@ -1,13 +1,57 @@
 {{define "layout"}}
 <!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>{{template "title"}}</title>
-  <link rel="stylesheet" href="/static/stylesheets/main.css">
-</head>
-<body>
-  {{template "body"}}
-</body>
+<html lang="zh-Hans">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>{{.Title}}</title>
+    <style>
+    </style>
+  </head>
+  <body>
+    
+    
+    <main role="main" class="container" >
+      <div class="my-3 p-3 bg-white rounded shadow-sm ">
+
+        <nav aria-label="breadcrumb" class=" navbar-expand-md navbar-dark ">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">HOME</a></li>
+            {{$last := .Breadcrumb.Last}}
+            {{range $k,$v := .Breadcrumb.Breadcrumb}}
+            <li class="breadcrumb-item" >{{if lt $k $last }} <a href="{{$v.Url}}">{{$v.Name}}</a>{{else}}{{$v.Name}}{{end}}</li>
+            {{end}}
+          </ol>
+        </nav>
+        
+        {{range .Urls}}
+        <div class="media text-muted pt-3">
+          <svg class="bd-placeholder-img mr-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 32x32"><title>{{.Name}}</title><rect width="100%" height="100%" fill="#007bff"></rect><text x="50%" y="50%" fill="#007bff" dy=".3em">32</text></svg>
+          <div class="media-body mb-0 small lh-125 border-bottom border-gray">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <strong class="text-gray-dark">{{.Name}}</strong>
+              <a class="btn btn-sm btn-primary" href="{{.Url}}">点击访问</a>
+            </div>
+            <span class="d-block">{{.Info}}</span>
+          </div>
+        </div>
+        {{end}}
+        
+        
+        <small class="d-block text-right mt-3">
+          <a href="..">返回上一层目录</a>
+        </small>
+      </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
 </html>
 {{end}}
