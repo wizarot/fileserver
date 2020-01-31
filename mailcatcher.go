@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-mailcatcher/utils"
 	"log"
 	"net/http"
 	"os"
@@ -44,11 +45,14 @@ import (
 // }
 
 func main() {
+	// 自己复制一个fileServer然后照着修改!
+	fs1 := utils.FileServer(utils.Dir("./"))
+	http.Handle("/", http.StripPrefix("/", fs1))
 	// static目录下使用 fileServer
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	// 其它路径使用serverTemplate处理
-	http.HandleFunc("/", serveTemplate)
+	// http.HandleFunc("/", serveTemplate)
 
 	log.Println("Listening...")
 	http.ListenAndServe(":3000", nil)
@@ -90,12 +94,6 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 				dirFiles += v.Name() + "</br>"
 			}
 
-			// fmt.Println("-------------")
-			// fmt.Println(v.Name())
-
-			// fmt.Println(v.Size())
-			// fmt.Println(v.ModTime())
-			// fmt.Println(v.Mode())
 		}
 		fmt.Fprintf(w, "Dir, %q", dirFiles)
 	} else {
