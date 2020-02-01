@@ -18,6 +18,9 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	// "github.com/gobuffalo/packr/v2"
+	rice "github.com/GeertJohan/go.rice"
 )
 
 var htmlReplacer = strings.NewReplacer(
@@ -157,7 +160,7 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	urls := []URLData{}
+	var urls []URLData
 	for _, d := range dirs {
 		name := d.Name()
 		// println(name)
@@ -170,7 +173,7 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 		// }
 
 		// Info := strconv.FormatInt(d.Size(), 10)
-		Info := "" //暂时没想好些什么
+		Info := "" // 暂时没想好些什么
 		// name may contain '?' or '#', which must be escaped to remain
 		// part of the URL path, and not indicate the start of a query
 		// string or fragment.
@@ -188,18 +191,30 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 	// 解析r.URL.Path到对应tpl
 	// fp := filepath.Join("views", "dir.html")
 	// tmpl, err := template.ParseFiles(lp, fp)
-	tmpl := template.Must(
-		template.ParseFiles(
-			"views/layout.html",
-		),
-	)
+	// tmpl := template.Must(
+	// 	template.ParseFiles(
+	// 		"views/layout.html",
+	// 	),
+	// )
+	// box := packr.New("views", "./views")
+	// layoutString , _ := box.FindString("views/layout.html")
+	// tmpl,_ := template.New("layout").Parse(layoutString)
+
+	box, err := rice.FindBox("../views")
 	if err != nil {
-		// Log the detailed error
-		log.Println(err.Error())
-		// Return a generic "Internal Server Error" message
-		http.Error(w, http.StatusText(500), 500)
+		println(err.Error())
 		return
 	}
+	layoutString, _ := box.String("layout.html")
+	tmpl, _ := template.New("layout").Parse(layoutString)
+
+	// if err != nil {
+	// 	// Log the detailed error
+	// 	log.Println(err.Error())
+	// 	// Return a generic "Internal Server Error" message
+	// 	http.Error(w, http.StatusText(500), 500)
+	// 	return
+	// }
 
 	if err := tmpl.ExecuteTemplate(w, "layout", map[string]interface{}{"Urls": urls, "Breadcrumb": breadcrumb, "BreadcrumbLastCurrent": 2, "Title": "GO简易文件服务器"}); err != nil {
 		log.Println(err.Error())
@@ -567,7 +582,8 @@ func isZeroTime(t time.Time) bool {
 
 func setLastModified(w http.ResponseWriter, modtime time.Time) {
 	if !isZeroTime(modtime) {
-		w.Header().Set("Last-Modified", modtime.UTC().Format(http.TimeFormat))
+		// 开发过程去掉这个,否则一直都会cache
+		// w.Header().Set("Last-Modified", modtime.UTC().Format(http.TimeFormat))
 	}
 }
 
@@ -696,7 +712,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs FileSystem, name strin
 			return
 		}
 		// 临时删掉,要不然每次都缓存太难debug了
-		w.Header().Set("Last-Modified", d.ModTime().UTC().Format(http.TimeFormat))
+		// w.Header().Set("Last-Modified", d.ModTime().UTC().Format(http.TimeFormat))
 		dirList(w, r, f, name)
 		return
 	}
