@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"go-mailcatcher/utils"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -44,7 +46,37 @@ import (
 // 	return f, nil
 // }
 
+// 获取本机ip
+func GetIP() string {
+	localIP := ""
+	addrs, err := net.InterfaceAddrs()
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	for _, address := range addrs {
+
+		// 检查ip地址判断是否回环地址
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				localIP = ipnet.IP.String()
+			}
+
+		}
+	}
+	return localIP
+}
+
 func main() {
+	// 获取本机IP
+	localIP := GetIP()
+	// 获取监听端口,建议mac电脑大于1024,否则需要sudo
+	var port string
+	flag.StringVar(&port, "port", "3000", "指定要使用的端口,默认是3000,建议Mac电脑不要使用小于1024的端口,否则需要sudo") // -port=9000输入
+	flag.Parse()
+
 	// 自己复制一个fileServer然后照着修改!
 	fs1 := utils.FileServer(utils.Dir("./"))
 	http.Handle("/", http.StripPrefix("/", fs1))
@@ -54,8 +86,8 @@ func main() {
 	// 其它路径使用serverTemplate处理
 	// http.HandleFunc("/", serveTemplate)
 
-	log.Println("Listening...")
-	http.ListenAndServe(":3000", nil)
+	log.Println("http://"+localIP+":"+port, "Listening...")
+	http.ListenAndServe(":"+port, nil)
 }
 
 func serveTemplate(w http.ResponseWriter, r *http.Request) {
