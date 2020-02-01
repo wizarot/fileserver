@@ -49,7 +49,9 @@
                   </td>
                   <td style="padding:5px;width: 10%;">
                     {{if eq .Extension ".mp3"}}
-                    <bottom class="player btn" data-url="{{$path}}/{{.Url}}" data-type="mp3">播放</bottom>
+                    <bottom class="player btn btn-success" data-url="{{$path}}{{.Url}}" data-type="mp3"> ▶ </bottom>
+                    {{else if eq .Extension ".mp4"}}
+                    <bottom class="player btn btn-success" data-url="{{$path}}{{.Url}}" data-type="mp4"> ▶ </bottom>
                     {{end}}
                   </audio>
               </td>
@@ -82,6 +84,8 @@
         let content = ""
         if (type == "mp3") {
           content = "<div class=\"h-100 row align-items-center\"><div class=\"container\"><audio class=\"js-player \" controls ><source src=\""+url+"\" type=\"audio/mp3\" /></div></div>";
+        }else if(type == "mp4"){
+          content = "<div class=\"h-100 row align-items-center\"><div class=\"container\"><video class=\"js-player \" playsinline controls><source src=\""+url+"\" type=\"video/mp4\"></video></div></div>";
         }
         layer.open({
           type: 1,
@@ -90,7 +94,6 @@
           content: content,
           title: '播放器'
         });
-
         const player = new Plyr(".js-player");
       })
 

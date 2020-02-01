@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	rice "github.com/GeertJohan/go.rice"
 	"io"
 	"log"
 	"mime"
@@ -18,9 +19,6 @@ import (
 	"strings"
 	"text/template"
 	"time"
-
-	// "github.com/gobuffalo/packr/v2"
-	rice "github.com/GeertJohan/go.rice"
 )
 
 var htmlReplacer = strings.NewReplacer(
@@ -128,7 +126,7 @@ type Breadcrumb struct {
 
 func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 	breadcrumb := Breadcrumb{}
-	breadcrumb.Path = path
+	breadcrumb.Path = strings.TrimRight(path, "/") + "/"
 	path = strings.TrimLeft(path, "/")
 	pathSplits := strings.Split(path, "/")
 

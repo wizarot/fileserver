@@ -3,14 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	rice "github.com/GeertJohan/go.rice"
 	"go-mailcatcher/utils"
 	"log"
 	"net"
 	"net/http"
 	"os"
-
-	// "github.com/gobuffalo/packr/v2"
-	rice "github.com/GeertJohan/go.rice"
 )
 
 // 获取本机ip
