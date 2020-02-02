@@ -12,3 +12,10 @@ go build
 # 将静态文件附加到fileserver中
 rice append --exec fileserver
 ```
+## 使用方式
+把编译好的可执行文件 fileserver 放到$PATH中.
+在需要分享的目录中,执行fileserver,然后就能访问了!
+
+## TODO
+加一个简单密码验证,可以设定访问密码
+找专家调一调前端,适应手机端访问

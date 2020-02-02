@@ -55,5 +55,8 @@ func main() {
 	http.Handle("/", http.StripPrefix("/", fs1))
 
 	log.Println("http://"+localIP+":"+port, "Listening...")
-	http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
