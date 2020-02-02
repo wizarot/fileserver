@@ -29,7 +29,6 @@ func GetIP() string {
 			if ipnet.IP.To4() != nil {
 				localIP = ipnet.IP.String()
 			}
-
 		}
 	}
 	return localIP
@@ -43,12 +42,6 @@ func main() {
 	flag.StringVar(&port, "port", "3000", "指定要使用的端口,默认是3000,建议Mac电脑不要使用小于1024的端口,否则需要sudo") // -port=9000输入
 	flag.Parse()
 
-	// static目录下使用 fileServer
-	// box := packr.New("static","./static")
-	// http.Handle("/static/", http.FileServer(box))
-	// fs := http.FileServer(http.Dir("static"))
-	// http.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	box1 := rice.MustFindBox("views")
 	viewsFileServer := http.StripPrefix("/views/", http.FileServer(box1.HTTPBox()))
 	http.Handle("/layout/", viewsFileServer)
@@ -60,9 +53,6 @@ func main() {
 	// 自己复制一个fileServer然后照着修改!
 	fs1 := utils.FileServer(utils.Dir("./"))
 	http.Handle("/", http.StripPrefix("/", fs1))
-
-	// 其它路径使用serverTemplate处理
-	// http.HandleFunc("/", serveTemplate)
 
 	log.Println("http://"+localIP+":"+port, "Listening...")
 	http.ListenAndServe(":"+port, nil)

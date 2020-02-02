@@ -117,12 +117,23 @@ type URLData struct {
 	Info      string
 	IsDir     bool
 	Extension string
+	IsImage   bool
 }
 
 type Breadcrumb struct {
 	Breadcrumb []URLData
 	Last       int
 	Path       string
+}
+
+func isImage(ext string) bool {
+
+	switch ext {
+	case "jpg", "bmp", "jpeg", "png", "gif", "tiff":
+		return true
+	default:
+		return false
+	}
 }
 
 func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
@@ -178,8 +189,9 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 		// string or fragment.
 		url := url.URL{Path: name}
 		extension := filepath.Ext(name)
+		isImageType := isImage(strings.TrimLeft(strings.ToLower(extension), "."))
 		// fmt.Fprintf(w, "<a href=\"%s\">%s</a>\n", url.String(), htmlReplacer.Replace(name))
-		urls = append(urls, URLData{Name: htmlReplacer.Replace(name), Url: url.String(), Info: Info, IsDir: d.IsDir(), Extension: extension})
+		urls = append(urls, URLData{Name: htmlReplacer.Replace(name), Url: url.String(), Info: Info, IsDir: d.IsDir(), Extension: extension, IsImage: isImageType})
 	}
 	// fmt.Println(urls)
 
@@ -211,7 +223,7 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 	// 	return
 	// }
 
-	if err := tmpl.ExecuteTemplate(w, "layout", map[string]interface{}{"Urls": urls, "Breadcrumb": breadcrumb, "BreadcrumbLastCurrent": 2, "Title": "GO简易文件服务器"}); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "layout", map[string]interface{}{"Urls": urls, "Breadcrumb": breadcrumb, "Title": "GO简易文件服务器"}); err != nil {
 		log.Println(err.Error())
 		http.Error(w, http.StatusText(500), 500)
 	}

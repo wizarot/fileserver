@@ -48,7 +48,9 @@
                    <a href="{{.Url}}" {{if not .IsDir}}target="_blank"{{end}}>{{.Name}}</a>
                   </td>
                   <td style="padding:5px;width: 10%;">
-                    {{if eq .Extension ".mp3"}}
+                    {{if .IsImage}}
+                    <img layer-src="{{$path}}{{.Url}}" src="{{$path}}{{.Url}}" style="max-width:100px;max-height:100px;cursor:pointer;">
+                    {{else if eq .Extension ".mp3"}}
                     <bottom class="player btn btn-success" data-url="{{$path}}{{.Url}}" data-type="mp3"> ▶ </bottom>
                     {{else if eq .Extension ".mp4"}}
                     <bottom class="player btn btn-success" data-url="{{$path}}{{.Url}}" data-type="mp4"> ▶ </bottom>
@@ -95,7 +97,12 @@
           title: '播放器'
         });
         const player = new Plyr(".js-player");
-      })
+      });
+
+      layer.photos({
+        photos: '.table'
+        ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+      }); 
 
       
   
