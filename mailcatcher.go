@@ -1,14 +1,15 @@
 package main
 
 import (
+	"fileserver/utils"
 	"flag"
 	"fmt"
-	rice "github.com/GeertJohan/go.rice"
-	"go-mailcatcher/utils"
 	"log"
 	"net"
 	"net/http"
 	"os"
+
+	rice "github.com/GeertJohan/go.rice"
 )
 
 // 获取本机ip
@@ -47,6 +48,10 @@ func main() {
 	// http.Handle("/static/", http.FileServer(box))
 	// fs := http.FileServer(http.Dir("static"))
 	// http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	box1 := rice.MustFindBox("views")
+	viewsFileServer := http.StripPrefix("/views/", http.FileServer(box1.HTTPBox()))
+	http.Handle("/layout/", viewsFileServer)
 
 	box := rice.MustFindBox("static")
 	staticFileServer := http.StripPrefix("/static/", http.FileServer(box.HTTPBox()))

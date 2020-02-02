@@ -3,7 +3,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	rice "github.com/GeertJohan/go.rice"
 	"io"
 	"log"
 	"mime"
@@ -19,6 +18,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	rice "github.com/GeertJohan/go.rice"
 )
 
 var htmlReplacer = strings.NewReplacer(
@@ -198,11 +199,7 @@ func dirList(w http.ResponseWriter, r *http.Request, f File, path string) {
 	// layoutString , _ := box.FindString("views/layout.html")
 	// tmpl,_ := template.New("layout").Parse(layoutString)
 
-	box, err := rice.FindBox("../views")
-	if err != nil {
-		println(err.Error())
-		return
-	}
+	box := rice.MustFindBox("views")
 	layoutString, _ := box.String("layout.html")
 	tmpl, _ := template.New("layout").Parse(layoutString)
 
