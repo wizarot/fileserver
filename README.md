@@ -20,6 +20,12 @@ rice append --exec fileserver.exe
 1. 把编译好的可执行文件 fileserver 放到$PATH中.
 2. 在需要分享的目录中,执行fileserver,然后就能访问了!
 
+v1.0
+参数 --port=3000 可以设置监听端口
+
+新版本v1.1
+增加参数 --username=admin --password=123 当password不为空,需要输入密码才能登陆
+
 ## TODO
-* 加一个简单密码验证,可以设定访问密码
-* 找专家调一调前端,适应手机端访问
+完成: 加一个简单密码验证,可以设定访问密码
+找专家调一调前端,适应手机端访问
