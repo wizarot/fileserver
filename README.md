@@ -11,6 +11,10 @@
 go build
 # 将静态文件附加到fileserver中
 rice append --exec fileserver
+# 编译windows版可执行文件exe
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build fileserver.go
+# 追加文件
+rice append --exec fileserver.exe
 ```
 ## 使用方式
 1. 把编译好的可执行文件 fileserver 放到$PATH中.
