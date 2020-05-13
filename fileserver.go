@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fileserver/qr"
 	"fileserver/utils"
 	"flag"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"os"
 
 	rice "github.com/GeertJohan/go.rice"
+	"github.com/davecheney/mdns"
 )
 
 // 获取本机ip
@@ -58,6 +60,8 @@ func main() {
 	flag.StringVar(&username, "username", "admin", "指定要使用的用戶名,默认 --username=admin")
 	var password string
 	flag.StringVar(&password, "password", "", "指定要使用的密码,默认为空则不需要输入 --password=123")
+	var hostname string
+	flag.StringVar(&hostname, "hostname", "", "可以指定一個hostname来访问文件服务器 --hostname=fileserver.local")
 
 	flag.Parse()
 
@@ -72,8 +76,16 @@ func main() {
 	// 自己复制一个fileServer然后照着修改!
 	fs1 := utils.FileServer(utils.Dir("./"))
 	http.Handle("/", authentication(http.StripPrefix("/", fs1), username, password))
+	sendURL := fmt.Sprintf("http://%s:%s", localIP, port)
+	if hostname != "" {
+		record := fmt.Sprintf("%s IN A %s", hostname, localIP)
+		mdns.Publish(record)
+		sendURL = fmt.Sprintf("http://%s:%s", hostname, port)
+	}
+	log.Println(sendURL, "Listening...")
 
-	log.Println("http://"+localIP+":"+port, "Listening...")
+	qr.RenderString(sendURL)
+
 	if password != "" {
 		log.Println("Auth username:" + username + " password:" + password)
 	}
